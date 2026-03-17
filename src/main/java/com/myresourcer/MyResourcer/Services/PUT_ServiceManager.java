@@ -46,7 +46,7 @@ public class PUT_ServiceManager {
         }
         // Check if the request with the given ID exists
         Optional<Request> existingRequestOpt = requestRepository.findById(id);
-        
+
         if (existingRequestOpt.isPresent()) {
             Request requestToUpdate = existingRequestOpt.get();
 
@@ -79,7 +79,7 @@ public class PUT_ServiceManager {
             requestRepository.save(requestToUpdate);
             return true;
         }
-        
+
         return false;
     }
 

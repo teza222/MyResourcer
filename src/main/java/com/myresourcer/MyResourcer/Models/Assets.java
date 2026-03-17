@@ -10,21 +10,23 @@ public class Assets {
     @Column(nullable = false)
     private String item;
     @Column(nullable = false)
-    private Boolean mobile;
+    private Boolean isMobile;
     @Column(nullable = false)
     private String serialNumber;
     private String specifications;
     @ManyToOne
     @JoinColumn(name = "categoryId", nullable = false)
     private Categories categoryId;
+    private Boolean isRemoved;
 
-    public Assets(Integer assetId, String item, Boolean mobile, String serialNumber, String specifications, Categories categoryId) {
+    public Assets(Integer assetId, String item, Boolean mobile, String serialNumber, String specifications, Categories categoryId, Boolean isRemoved) {
         this.assetId = assetId;
         this.item = item;
-        this.mobile = mobile;
+        this.isMobile = mobile;
         this.serialNumber = serialNumber;
         this.specifications = specifications;
         this.categoryId = categoryId;
+        this.isRemoved = isRemoved;
     }
 
     public Assets(){
@@ -47,12 +49,12 @@ public class Assets {
         this.item = item;
     }
 
-    public Boolean isMobile() {
-        return mobile;
+    public Boolean getMobile() {
+        return isMobile;
     }
 
     public void setMobile(Boolean mobile) {
-        this.mobile = mobile;
+        isMobile = mobile;
     }
 
     public String getSerialNumber() {
@@ -78,16 +80,12 @@ public class Assets {
     public void setCategoryId(Categories categoryId) {
         this.categoryId = categoryId;
     }
+
+    public Boolean getRemoved() {
+        return isRemoved;
+    }
+
+    public void setRemoved(Boolean removed) {
+        isRemoved = removed;
+    }
 }
-
-
-
-//    // This helper method tells Jackson how to handle a numeric ID for the category.
-//    @JsonProperty("categoryId")
-//    public void setCategoryById(Integer id) {
-//        if (id != null) {
-//            this.categoryId = new Categories();
-//            this.categoryId.setCategoryId(id);
-//        }
-//    }
-//}
