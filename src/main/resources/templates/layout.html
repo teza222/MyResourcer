@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyResourcer</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            overflow-x: hidden;
+            background-color: #f8f9fa;
+        }
+        .carousel-item {
+            height: 500px;
+            background-size: cover;
+            background-position: center;
+        }
+        .carousel-caption {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        /* Custom navbar overlay for the index page */
+        .index-nav {
+            background: rgba(0, 0, 0, 0.8);
+            position: absolute;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        /* Dashboard Wrapper Styles */
+        .wrapper {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+        #sidebar {
+            min-width: 250px;
+            max-width: 250px;
+            background: #212529;
+            color: #fff;
+            transition: all 0.3s ease-in-out;
+            position: relative;
+        }
+        #sidebar.collapsed {
+            min-width: 80px;
+            max-width: 80px;
+        }
+        #sidebar .sidebar-header {
+            padding: 15px;
+            background: #1a1e21;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        #sidebar.collapsed .sidebar-header .brand-logo,
+        #sidebar.collapsed ul li a span {
+            display: none;
+        }
+        #sidebar .brand-logo {
+            max-width: 150px;
+            height: auto;
+        }
+        #sidebar ul.components {
+            padding: 20px 0;
+        }
+        #sidebar ul li a {
+            padding: 15px 25px;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            color: #adb5bd;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        #sidebar.collapsed ul li a {
+            justify-content: center;
+            padding: 15px 0;
+        }
+        #sidebar ul li a:hover, #sidebar ul li.active > a {
+            color: #fff;
+            background: #343a40;
+            border-left: 4px solid #0d6efd;
+        }
+        #sidebar ul li.active > a {
+            background: #343a40;
+            color: white;
+        }
+        #sidebar ul li a i {
+            font-size: 1.3rem;
+            min-width: 30px;
+        }
+        #sidebar.collapsed ul li a i {
+            margin-right: 0;
+        }
+        #sidebar ul li a span {
+            margin-left: 10px;
+            white-space: nowrap;
+        }
+        #sidebarCollapse {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+        #page-content-wrapper {
+            flex-grow: 1;
+            padding: 30px;
+            background: #f4f7f6;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+<!-- Conditionally show global navbar -->
+<th:block th:if="${hideNavbar == null or !hideNavbar}">
+    <div th:replace="~{navbar :: navbar}"></div>
+</th:block>
+
+<!-- Use Dashboard layout if showDashboardLayout flag is true -->
+<th:block th:if="${showDashboardLayout}">
+    <div class="wrapper">
+        <div th:replace="~{sidebar :: sidebar(activeTab=${activeTab})}"></div>
+        <div id="page-content-wrapper">
+            <div th:replace="~{::content}"></div>
+        </div>
+    </div>
+</th:block>
+
+<!-- Use normal layout for all other pages (Login, Register, Home) -->
+<th:block th:unless="${showDashboardLayout}">
+    <div th:replace="~{::content}"></div>
+</th:block>
+
+<!-- Bootstrap Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Sidebar Toggle Script -->
+<script th:if="${showDashboardLayout}">
+    document.addEventListener('DOMContentLoaded', function () {
+        const sidebar = document.getElementById('sidebar');
+        const collapseBtn = document.getElementById('sidebarCollapse');
+
+        if (collapseBtn) {
+            collapseBtn.addEventListener('click', function () {
+                sidebar.classList.toggle('collapsed');
+            });
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout}">
+<head>
+    <title>Login - MyResourcer</title>
+</head>
+<div th:fragment="content">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-person-circle text-primary" style="font-size: 4rem;"></i>
+                        <h2 class="fw-bold mt-2">Login</h2>
+                        <p class="text-muted">Access your management dashboard</p>
+                    </div>
+
+                    <!-- Alert for successful registration -->
+                    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                        Account created successfully! You can now log in.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                    <!-- Alert for login errors -->
+                    <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        Invalid username or password.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                    <!-- Alert for logout -->
+                    <div th:if="${param.logout}" class="alert alert-info alert-dismissible fade show" role="alert">
+                        You have been logged out.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+
+                    <form th:action="@{/login}" method="post">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-person"></i></span>
+                                <input type="text" class="form-control border-start-0 bg-light" id="username" name="username" placeholder="Enter your username" required autofocus>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock"></i></span>
+                                <input type="password" class="form-control border-start-0 bg-light" id="password" name="password" placeholder="Enter your password" required>
+                            </div>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="remember-me" name="remember-me">
+                            <label class="form-check-label" for="remember-me">Remember me</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Login</button>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <div class="text-center">
+                        <p class="mb-0">Don't have an account?</p>
+                        <a href="/register" class="text-primary text-decoration-none fw-bold">Register here</a>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <a href="/" class="text-muted text-decoration-none small"><i class="bi bi-arrow-left me-1"></i> Back to Home</a>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

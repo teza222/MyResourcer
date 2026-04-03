@@ -8,6 +8,7 @@ public class MyResourcerApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(MyResourcerApplication.class, args);
+		//System.setProperty("java.awt.headless", "false");
 	}
 
 }

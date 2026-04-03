@@ -6,18 +6,21 @@ import jakarta.persistence.*;
 public class DTO_Assets {
     private Integer assetId;
     private String item;
-    private Boolean mobile;
+    private Boolean mobile; // Renamed from isMobile to mobile for consistency with JSON
     private String serialNumber;
     private String specifications;
     private Integer categoryId;
+    private Boolean removed; // Renamed from isRemoved to removed for consistency with JSON
 
-    public DTO_Assets(Integer assetId, String item, Boolean mobile, String serialNumber, String specifications, Integer categoryId) {
+
+    public DTO_Assets(Integer assetId, String item, Boolean mobile, String serialNumber, String specifications, Integer categoryId, Boolean removed) {
         this.assetId = assetId;
         this.item = item;
         this.mobile = mobile;
         this.serialNumber = serialNumber;
         this.specifications = specifications;
         this.categoryId = categoryId;
+        this.removed = removed;
     }
 
     public DTO_Assets(){
@@ -40,7 +43,8 @@ public class DTO_Assets {
         this.item = item;
     }
 
-    public Boolean isMobile() {
+    // Changed from isMobile() to getMobile() for standard JavaBean convention
+    public Boolean getMobile() {
         return mobile;
     }
 
@@ -71,7 +75,13 @@ public class DTO_Assets {
     public void setCategoryId(Integer categoryId) {
         this.categoryId = categoryId;
     }
+
+    // Changed from getRemoved() to getRemoved() for standard JavaBean convention
+    public Boolean getRemoved() {
+        return removed;
+    }
+
+    public void setRemoved(Boolean removed) {
+        this.removed = removed;
+    }
 }
-
-
-

@@ -50,7 +50,7 @@ public class AllPostEndpointsTest {
         Condition condition = new Condition(1, "Test Condition");
 
         Users user = new Users(1, "testuser_req", "password", "Test", "User", role, dept, 1);
-        Assets asset = new Assets(1, "Test Asset", true, "SN_REQ", "Specs", cat);
+        Assets asset = new Assets(1, "Test Asset", true, "SN_REQ", "Specs", cat, false);
 
         // Create the DTO
         DTO_Request request = new DTO_Request();

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout}">
+<head>
+    <title>Stationery Catalog - MyResourcer</title>
+</head>
+<div th:fragment="content">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-dark mb-0"><i class="bi bi-door-closed me-2"></i> Stationery Catalog</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Stationery</li>
+                </ol>
+            </nav>
+        </div>
+
+        <!-- Status Feedback Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Assets List -->
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th class="border-0">Asset Name</th>
+                            <th class="border-0">Serial Number</th>
+                            <th class="border-0">Category</th>
+                            <th class="border-0">Mobile</th>
+                                <th class="border-0 text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="border-top-0">
+                            <tr th:each="asset : ${assets}">
+                                <td>
+                                    <div class="fw-bold text-dark" th:text="${asset.item}"></div>
+                                    <small class="text-muted" th:text="${asset.specifications}"></small>
+                                </td>
+                                <td th:text="${asset.serialNumber}"></td>
+                                <td>
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary" th:text="${asset.categoryId.categoryName}"></span>
+                                </td>
+                                <td>
+                                    <i th:if="${asset.mobile}" class="bi bi-check-circle-fill text-success" title="Yes"></i>
+                                    <i th:unless="${asset.mobile}" class="bi bi-x-circle-fill text-danger" title="No"></i>
+                                </td>
+                                <td class="text-end">
+                                    <form th:action="@{/dashboard/request-asset}" method="post" onsubmit="return confirm('Are you sure you want to request this asset?');">
+                                        <input type="hidden" name="assetId" th:value="${asset.assetId}">
+                                        <button type="submit" class="btn btn-primary btn-sm px-3 rounded-pill shadow-sm">
+                                            <i class="bi bi-plus-circle me-1"></i> Request
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(assets)}">
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-search fs-1 d-block mb-3 opacity-25"></i>
+                                    No Assets found in the catalog.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

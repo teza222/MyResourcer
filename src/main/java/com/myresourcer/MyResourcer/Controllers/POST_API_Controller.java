@@ -2,6 +2,7 @@ package com.myresourcer.MyResourcer.Controllers;
 
 import com.myresourcer.MyResourcer.DTOs.DTO_Assets;
 import com.myresourcer.MyResourcer.DTOs.DTO_Request;
+import com.myresourcer.MyResourcer.DTOs.DTO_Users;
 import com.myresourcer.MyResourcer.Models.*;
 import com.myresourcer.MyResourcer.Services.POST_ServiceManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -135,7 +137,7 @@ public class POST_API_Controller {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<String> addUser(@RequestBody Users users) {
+    public ResponseEntity<String> addUser(@RequestBody DTO_Users users) {
         logger.info("Adding new user: {}", users.getUsername());
 
         try {

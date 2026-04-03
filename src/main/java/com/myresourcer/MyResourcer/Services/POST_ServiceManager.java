@@ -2,6 +2,7 @@ package com.myresourcer.MyResourcer.Services;
 
 import com.myresourcer.MyResourcer.DTOs.DTO_Assets;
 import com.myresourcer.MyResourcer.DTOs.DTO_Request;
+import com.myresourcer.MyResourcer.DTOs.DTO_Users;
 import com.myresourcer.MyResourcer.Models.*;
 import com.myresourcer.MyResourcer.Repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +72,7 @@ public class POST_ServiceManager {
 
             formmatedAssets.setAssetId(assets.getAssetId());
             formmatedAssets.setItem(assets.getItem());
-            formmatedAssets.setMobile(assets.isMobile());
+            formmatedAssets.setMobile(assets.getMobile());
             formmatedAssets.setSerialNumber(assets.getSerialNumber());
             formmatedAssets.setSpecifications(assets.getSpecifications());
             Categories categories = new Categories();
@@ -113,11 +114,23 @@ public class POST_ServiceManager {
     }
 
 
-    public boolean addUser(Users users){
+    public boolean addUser(DTO_Users users){
         if(users == null){
             return false;
         }
-        userRepository.save(users);
+        Users newUsers = new Users();
+        newUsers.setUsername(users.getUsername());
+        newUsers.setPassword(users.getPassword());
+        newUsers.setFname(users.getFname());
+        newUsers.setLname(users.getLname());
+        Roles roles = new Roles();
+        roles.setRoleId(users.getRoleId());
+        newUsers.setRoleId(roles);
+        Departments departments = new Departments();
+        departments.setDepartmentId(users.getDepartmentId());
+        newUsers.setDepartmentId(departments);
+        newUsers.setFlag(users.getFlag());
+        userRepository.save(newUsers);
         return true;
     }
 

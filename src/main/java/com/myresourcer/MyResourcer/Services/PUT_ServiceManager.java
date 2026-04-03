@@ -96,7 +96,9 @@ public class PUT_ServiceManager {
             if(assetData.getItem() != null) assetToUpdate.setItem(assetData.getItem());
             if(assetData.getSpecifications() != null) assetToUpdate.setSpecifications(assetData.getSpecifications());
             if(assetData.getSerialNumber() != null) assetToUpdate.setSerialNumber(assetData.getSerialNumber());
-            if(assetData.isMobile() != null) assetToUpdate.setMobile(assetData.isMobile());
+            if(assetData.getMobile() != null) assetToUpdate.setMobile(assetData.getMobile());
+            assetRepository.save(assetToUpdate);
+            return true;
 
         }
         return false;
@@ -113,6 +115,8 @@ public class PUT_ServiceManager {
             Categories categoryToUpdate = existingCategoryOpt.get();
             // Updating fields
             if(categoryData.getCategoryName() != null) categoryToUpdate.setCategoryName(categoryData.getCategoryName());
+            categoryRepository.save(categoryToUpdate);
+            return true;
         }
         return false;
     }
@@ -128,6 +132,8 @@ public class PUT_ServiceManager {
             Condition conditionToUpdate = existingConditionOpt.get();
             // Updating fields
             if(conditionData.getConditionName() != null) conditionToUpdate.setConditionName(conditionData.getConditionName());
+            conditionRepository.save(conditionToUpdate);
+            return true;
         }
         return false;
     }
@@ -144,6 +150,8 @@ public class PUT_ServiceManager {
             Departments departmentToUpdate = existingDepartmentOpt.get();
             // Updating fields
             if(departmentData.getDepartmentName() != null) departmentToUpdate.setDepartmentName(departmentData.getDepartmentName());
+            departmentRepository.save(departmentToUpdate);
+            return true;
         }
         return false;
     }
@@ -158,7 +166,12 @@ public class PUT_ServiceManager {
         if(existingUserOpt.isPresent()){
             Users userToUpdate = existingUserOpt.get();
             // Updating fields
-            if(userData.getUsername() != null) userToUpdate.setUsername(userData.getUsername());
+            if(userData.getUsername() != null) {
+                userToUpdate.setUsername(userData.getUsername());
+                userRepository.save(userToUpdate);
+                return true;
+            }
+
     }
         return false;
     }
@@ -174,6 +187,8 @@ public class PUT_ServiceManager {
             Roles roleToUpdate = existingRoleOpt.get();
             // Updating fields
             if(roleData.getRoleName() != null) roleToUpdate.setRoleName(roleData.getRoleName());
+            roleRepository.save(roleToUpdate);
+            return true;
         }
         return  false;
     }
@@ -189,6 +204,8 @@ public class PUT_ServiceManager {
             Status statusToUpdate = existingStatusOpt.get();
             // Updating fields
             if(statusData.getStatusName() != null) statusToUpdate.setStatusName(statusData.getStatusName());
+            statusRepository.save(statusToUpdate);
+            return true;
         }
         return false;
     }
