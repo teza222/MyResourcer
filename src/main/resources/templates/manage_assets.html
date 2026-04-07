@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout}">
+<head>
+    <title>Manage Assets - MyResourcer</title>
+</head>
+<div th:fragment="content">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-dark"><i class="bi bi-box-seam me-2"></i> Manage Assets</h2>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAssetModal">
+                <i class="bi bi-plus-lg me-1"></i> Add New Asset
+            </button>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Assets Table -->
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="border-0">ID</th>
+                                <th class="border-0">Item Name</th>
+                                <th class="border-0">Category</th>
+                                <th class="border-0">Serial Number</th>
+                                <th class="border-0">Type</th>
+                                <th class="border-0 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="border-top-0">
+                            <tr th:each="asset : ${assets}">
+                                <td th:text="${asset.assetId}"></td>
+                                <td class="fw-bold" th:text="${asset.item}"></td>
+                                <td th:text="${asset.categoryId.categoryName}"></td>
+                                <td th:text="${asset.serialNumber}"></td>
+                                <td>
+                                    <span th:if="${asset.mobile}" class="badge bg-info text-dark">Mobile</span>
+                                    <span th:unless="${asset.mobile}" class="badge bg-secondary">Fixed</span>
+                                </td>
+                                <td class="text-center">
+                                    <form th:action="@{/admin/delete-asset}" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to remove this asset?');">
+                                        <input type="hidden" name="assetId" th:value="${asset.assetId}" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i> Delete
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(assets)}">
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    No assets found. Click "Add New Asset" to get started.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Asset Modal -->
+    <div class="modal fade" id="addAssetModal" tabindex="-1" aria-labelledby="addAssetModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white border-0">
+                    <h5 class="modal-title fw-bold" id="addAssetModalLabel">Add New Asset</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form th:action="@{/admin/add-asset}" method="post">
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label for="item" class="form-label">Item Name</label>
+                            <input type="text" class="form-control" id="item" name="item" required placeholder="e.g., MacBook Pro 14">
+                        </div>
+                        <div class="mb-3">
+                            <label for="categoryId" class="form-label">Category</label>
+                            <select class="form-select" id="categoryId" name="categoryId" required>
+                                <option value="" disabled selected>Choose a category...</option>
+                                <option th:each="cat : ${categories}" th:value="${cat.categoryId}" th:text="${cat.categoryName}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="serialNumber" class="form-label">Serial Number</label>
+                            <input type="text" class="form-control" id="serialNumber" name="serialNumber" required placeholder="Enter serial/asset tag">
+                        </div>
+                        <div class="mb-3">
+                            <label for="specifications" class="form-label">Specifications</label>
+                            <textarea class="form-control" id="specifications" name="specifications" rows="3" placeholder="Technical details..."></textarea>
+                        </div>
+                        <div class="form-check form-switch mt-3">
+                            <input class="form-check-input" type="checkbox" id="isMobile" name="isMobile" value="true">
+                            <label class="form-check-label" for="isMobile">Is this a mobile asset?</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary px-4">Save Asset</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

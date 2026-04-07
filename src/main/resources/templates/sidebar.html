@@ -12,27 +12,57 @@
             </button>
         </div>
         <ul class="list-unstyled components">
-            <li th:class="${activeTab == 'home' ? 'active' : ''}">
-                <a href="/dashboard"><i class="bi bi-house-door"></i> <span>Home</span></a>
+            <!-- COMMON HOME -->
+            <li th:class="${activeTab == 'home' || activeTab == 'admin-home' ? 'active' : ''}">
+                <a th:href="${user.roleId.roleName == 'Administrator' ? '/admin/dashboard' : '/dashboard'}">
+                    <i class="bi bi-house-door"></i> <span>Home</span>
+                </a>
             </li>
-            <li th:class="${activeTab == 'electronics' ? 'active' : ''}">
-                <a href="/dashboard/electronics"><i class="bi bi-laptop"></i> <span>Electronics</span></a>
-            </li>
-            <li th:class="${activeTab == 'rooms' ? 'active' : ''}">
-                <a href="/dashboard/rooms"><i class="bi bi-door-closed"></i> <span>Rooms</span></a>
-            </li>
-            <li th:class="${activeTab == 'tools' ? 'active' : ''}">
-                <a href="/dashboard/tools"><i class="bi bi-tools"></i> <span>Tools</span></a>
-            </li>
-            <li th:class="${activeTab == 'stationery' ? 'active' : ''}">
-                <a href="/dashboard/stationery"><i class="bi bi-journal-text"></i> <span>Stationery</span></a>
-            </li>
-            <li th:class="${activeTab == 'support' ? 'active' : ''}">
-                <a href="/dashboard/support"><i class="bi bi-person-walking"></i> <span>Support</span></a>
-            </li>
-            <li th:class="${activeTab == 'others' ? 'active' : ''}">
-                <a href="/dashboard/others"><i class="bi bi-grid"></i> <span>Others</span></a>
-            </li>
+
+            <!-- USER ONLY LINKS (Shown if user is NOT an Administrator) -->
+            <th:block th:if="${user.roleId.roleName != 'Administrator'}">
+                <li th:class="${activeTab == 'electronics' ? 'active' : ''}">
+                    <a href="/dashboard/electronics"><i class="bi bi-laptop"></i> <span>Electronics</span></a>
+                </li>
+                <li th:class="${activeTab == 'rooms' ? 'active' : ''}">
+                    <a href="/dashboard/rooms"><i class="bi bi-door-closed"></i> <span>Rooms</span></a>
+                </li>
+                <li th:class="${activeTab == 'tools' ? 'active' : ''}">
+                    <a href="/dashboard/tools"><i class="bi bi-tools"></i> <span>Tools</span></a>
+                </li>
+                <li th:class="${activeTab == 'stationery' ? 'active' : ''}">
+                    <a href="/dashboard/stationery"><i class="bi bi-journal-text"></i> <span>Stationery</span></a>
+                </li>
+                <li th:class="${activeTab == 'support' ? 'active' : ''}">
+                    <a href="/dashboard/support"><i class="bi bi-person-walking"></i> <span>Support</span></a>
+                </li>
+                <li th:class="${activeTab == 'others' ? 'active' : ''}">
+                    <a href="/dashboard/others"><i class="bi bi-grid"></i> <span>Others</span></a>
+                </li>
+            </th:block>
+
+            <!-- ADMIN ONLY  -->
+            <th:block th:if="${user.roleId.roleName == 'Administrator'}">
+                <li th:class="${activeTab == 'manage-assets' ? 'active' : ''}">
+                    <a href="/admin/manage-assets"><i class="bi bi-box-seam"></i> <span>Manage Assets</span></a>
+                </li>
+                <li th:class="${activeTab == 'manage-requests' ? 'active' : ''}">
+                    <a href="/admin/manage-requests"><i class="bi bi-file-earmark-text"></i> <span>Manage Requests</span></a>
+                </li>
+                <li th:class="${activeTab == 'manage-users' ? 'active' : ''}">
+                    <a href="/admin/manage-users"><i class="bi bi-people-fill"></i> <span>Manage Users</span></a>
+                </li>
+                <li th:class="${activeTab == 'manage-categories' ? 'active' : ''}">
+                    <a href="/admin/manage-categories"><i class="bi bi-tags"></i> <span>Categories</span></a>
+                </li>
+                <li th:class="${activeTab == 'manage-departments' ? 'active' : ''}">
+                    <a href="/admin/manage-departments"><i class="bi bi-building"></i> <span>Departments</span></a>
+                </li>
+                <li th:class="${activeTab == 'reports' ? 'active' : ''}">
+                    <a href="/admin/reports"><i class="bi bi-bar-chart-fill"></i> <span>Reports</span></a>
+                </li>
+            </th:block>
+
             <li class="mt-5">
                 <a href="/logout" class="text-danger"><i class="bi bi-box-arrow-right"></i> <span>Logout</span></a>
             </li>

@@ -61,4 +61,9 @@ public class GET_API_Controller {
         return serviceManager.getAllStatuses();
     }
 
+    @GetMapping("/Comments")
+    public List<Comments> getAllComments(){
+        return serviceManager.getAllComments();
+    }
+
 }

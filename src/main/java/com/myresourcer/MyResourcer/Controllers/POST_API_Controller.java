@@ -198,4 +198,24 @@ public class POST_API_Controller {
                     .body("Server error while adding status");
         }
     }
+
+    @PostMapping("/comments")
+    public ResponseEntity<String> addComment(@RequestBody Comments comments) {
+        logger.info("Adding new comment: {}", comments.getComment());
+        try {boolean isCommentAdded = serviceManager.addComment(comments);
+
+            if (isCommentAdded) {
+                logger.debug("Comment added successfully: {}", comments.getComment());
+                return ResponseEntity.status(HttpStatus.CREATED).body("Comment Successfully Added");
+            } else {
+                logger.warn("Comment not added: {}", comments.getComment());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Comment Not Added");
+            }
+        } catch (Exception e) {
+            logger.error("Error adding comment: {}", comments.getComment(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Server error while adding comment");
+        }
+    }
+
 }

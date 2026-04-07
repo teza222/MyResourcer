@@ -33,6 +33,9 @@ public class POST_ServiceManager {
     @Autowired
     Status_Repository statusRepository;
 
+    @Autowired
+    Comment_Repository commentRepository;
+
 
 
     public POST_ServiceManager() {
@@ -153,4 +156,11 @@ public class POST_ServiceManager {
     }
 
 
+    public boolean addComment(Comments comments) {
+        if (comments == null) {
+            return false;
+        }
+        commentRepository.save(comments);
+        return true;
+    }
 }

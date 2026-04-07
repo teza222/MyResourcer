@@ -33,6 +33,11 @@ public class GET_ServiceManager {
     @Autowired
     Status_Repository statusRepository;
 
+    @Autowired
+    Comment_Repository commentRepository;
+
+
+
 
 
     public GET_ServiceManager() {
@@ -87,5 +92,7 @@ public class GET_ServiceManager {
     }
 
 
-
+    public List<Comments> getAllComments() {
+        return commentRepository.findAll();
+    }
 }

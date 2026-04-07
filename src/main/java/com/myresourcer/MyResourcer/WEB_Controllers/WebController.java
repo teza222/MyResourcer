@@ -55,9 +55,19 @@ public class WebController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    // This method will run before any @RequestMapping method and add the 'user' object to the model
+    @ModelAttribute
+    public void addAuthenticatedUserToModel(Model model, Principal principal) {
+        if (principal != null) {
+            userRepository.findByUsername(principal.getName())
+                    .ifPresent(user -> model.addAttribute("user", user));
+        }
+    }
+
     @GetMapping("/")
     public String index(Model model) {
-        model.addAttribute("assetCount", serviceManager.getAllAssets().size());
+        // Filter out removed assets for the count
+        model.addAttribute("assetCount", serviceManager.getAllAssets().stream().filter(a -> a.getRemoved() == null || !a.getRemoved()).count());
         model.addAttribute("userCount", serviceManager.getAllUsers().size());
         model.addAttribute("requestCount", serviceManager.getAllRequests().size());
         
@@ -102,26 +112,122 @@ public class WebController {
             return "redirect:/login";
         }
 
+        Users user = (Users) model.getAttribute("user");
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        if ("Administrator".equalsIgnoreCase(user.getRoleId().getRoleName())) {
+            return "redirect:/admin/dashboard";
+        }
+
         model.addAttribute("hideNavbar", true);
         model.addAttribute("showDashboardLayout", true);
         model.addAttribute("activeTab", "home");
-
-        String username = principal.getName();
-        Users user = userRepository.findAll().stream()
-                .filter(u -> u.getUsername().equals(username))
-                .findFirst()
-                .orElse(null);
-
-        if (user != null) {
-            model.addAttribute("user", user);
-            List<Request> sortedRequests = requestRepository.findAll().stream()
-                    .filter(r -> r.getUserId().getId().equals(user.getId()))
-                    .sorted(Comparator.comparing(Request::getRequestId).reversed())
-                    .collect(Collectors.toList());
-            model.addAttribute("requests", sortedRequests);
-        }
+        
+        List<Request> sortedRequests = requestRepository.findAll().stream()
+                .filter(r -> r.getUserId().getId().equals(user.getId()))
+                .sorted(Comparator.comparing(Request::getRequestId).reversed())
+                .collect(Collectors.toList());
+        model.addAttribute("requests", sortedRequests);
 
         return "dashboard";
+    }
+
+    @GetMapping("/admin/dashboard")
+    public String adminDashboard(Model model, Principal principal) {
+        if (principal == null) {
+            return "redirect:/login";
+        }
+
+        Users user = (Users) model.getAttribute("user");
+        if (user == null || !"Administrator".equalsIgnoreCase(user.getRoleId().getRoleName())) {
+            return "redirect:/dashboard";
+        }
+
+        model.addAttribute("hideNavbar", true);
+        model.addAttribute("showDashboardLayout", true);
+        model.addAttribute("activeTab", "admin-home");
+
+        // Filter out removed assets for the count
+        model.addAttribute("assetCount", assetRepository.findAll().stream().filter(a -> a.getRemoved() == null || !a.getRemoved()).count());
+        model.addAttribute("userCount", serviceManager.getAllUsers().size());
+        model.addAttribute("requestCount", serviceManager.getAllRequests().size());
+        model.addAttribute("categoryCount", serviceManager.getAllCategories().size());
+        
+        model.addAttribute("pendingRequestsCount", requestRepository.findAll().stream()
+                .filter(r -> "Pending".equalsIgnoreCase(r.getStatusId().getStatusName()))
+                .count());
+        model.addAttribute("approvedRequestsCount", requestRepository.findAll().stream()
+                .filter(r -> "Approved".equalsIgnoreCase(r.getStatusId().getStatusName()))
+                .count());
+        model.addAttribute("canceledRequestsCount", requestRepository.findAll().stream()
+                .filter(r -> "Canceled".equalsIgnoreCase(r.getStatusId().getStatusName()))
+                .count());
+
+        return "admin_dashboard";
+    }
+
+    @GetMapping("/admin/manage-assets")
+    public String manageAssets(Model model, Principal principal) {
+        if (principal == null) return "redirect:/login";
+        Users user = (Users) model.getAttribute("user");
+        if (user == null || !"Administrator".equalsIgnoreCase(user.getRoleId().getRoleName())) {
+            return "redirect:/dashboard";
+        }
+
+        model.addAttribute("hideNavbar", true);
+        model.addAttribute("showDashboardLayout", true);
+        model.addAttribute("activeTab", "manage-assets");
+
+        // Filter out removed assets
+        List<Assets> activeAssets = assetRepository.findAll().stream()
+                .filter(a -> a.getRemoved() == null || !a.getRemoved())
+                .collect(Collectors.toList());
+        model.addAttribute("assets", activeAssets);
+        model.addAttribute("categories", serviceManager.getAllCategories());
+
+        return "manage_assets";
+    }
+
+    @PostMapping("/admin/add-asset")
+    public String addAsset(@RequestParam String item,
+                           @RequestParam String serialNumber,
+                           @RequestParam(required = false) String specifications,
+                           @RequestParam Integer categoryId,
+                           @RequestParam(defaultValue = "false") Boolean isMobile,
+                           RedirectAttributes redirectAttributes) {
+
+        Categories category = categoryRepository.findById(categoryId).orElse(null);
+        if (category == null) {
+            redirectAttributes.addFlashAttribute("error", "Invalid category selected.");
+            return "redirect:/admin/manage-assets";
+        }
+
+        Assets asset = new Assets();
+        asset.setItem(item);
+        asset.setSerialNumber(serialNumber);
+        asset.setSpecifications(specifications);
+        asset.setCategoryId(category);
+        asset.setMobile(isMobile);
+        asset.setRemoved(false); // New assets are not removed by default
+
+        assetRepository.save(asset);
+        redirectAttributes.addFlashAttribute("success", "Asset '" + item + "' added successfully!");
+        return "redirect:/admin/manage-assets";
+    }
+
+    @PostMapping("/admin/delete-asset")
+    public String deleteAsset(@RequestParam Integer assetId, RedirectAttributes redirectAttributes) {
+        Assets asset = assetRepository.findById(assetId).orElse(null);
+        if (asset != null) {
+            asset.setRemoved(true); // Soft delete: set isRemoved to true
+            assetRepository.save(asset);
+            redirectAttributes.addFlashAttribute("success", "Asset '" + asset.getItem() + "' has been removed.");
+        } else {
+            redirectAttributes.addFlashAttribute("error", "Asset not found.");
+        }
+        return "redirect:/admin/manage-assets";
     }
 
     @GetMapping("/dashboard/electronics")
@@ -154,18 +260,20 @@ public class WebController {
         return getRelevantAsset("Others", principal, model);
     }
 
-
-
-
-
-
-
-
-    // All assets categories will call this method to limit repeated code
     public String getRelevantAsset(String assetName, Principal principal, Model model) {
         if (principal == null) {
             return "redirect:/login";
         }
+
+        Users user = (Users) model.getAttribute("user");
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        if ("Administrator".equalsIgnoreCase(user.getRoleId().getRoleName())) {
+            return "redirect:/admin/dashboard";
+        }
+
         model.addAttribute("hideNavbar", true);
         model.addAttribute("showDashboardLayout", true);
         model.addAttribute("activeTab", assetName.toLowerCase());
@@ -183,10 +291,11 @@ public class WebController {
                 .orElse(null);
 
         if (category != null) {
-            // Only show assets that are in the specified category, AND NOT currently checked out
+            // Only show assets that are in the specified category, NOT currently checked out, AND NOT removed
             List<Assets> availableAssets = assetRepository.findAll().stream()
                     .filter(a -> a.getCategoryId().getCategoryId().equals(category.getCategoryId()))
                     .filter(a -> !unavailableAssetIds.contains(a.getAssetId()))
+                    .filter(a -> a.getRemoved() == null || !a.getRemoved()) // Filter out removed assets
                     .collect(Collectors.toList());
             model.addAttribute("assets", availableAssets);
         } else {
@@ -196,36 +305,28 @@ public class WebController {
         return "dashboard_"+assetName.toLowerCase();
     }
 
-
-
     @PostMapping("/dashboard/request-asset")
-    public String requestAsset(@RequestParam Integer assetId, Principal principal, RedirectAttributes redirectAttributes) {
+    public String requestAsset(@RequestParam Integer assetId, Principal principal, Model model, RedirectAttributes redirectAttributes) {
         if (principal == null) {
             return "redirect:/login";
         }
 
-        String username = principal.getName();
-        Users user = userRepository.findAll().stream()
-                .filter(u -> u.getUsername().equals(username))
-                .findFirst()
-                .orElse(null);
+        Users user = (Users) model.getAttribute("user");
+        if (user == null) {
+            redirectAttributes.addFlashAttribute("error", "User not found.");
+            return "redirect:/dashboard";
+        }
 
         Assets asset = assetRepository.findById(assetId).orElse(null);
-
-        // Determine where to redirect back to based on the asset category
         String redirectTarget = "/dashboard/electronics";
         if (asset != null && asset.getCategoryId() != null &&
             "Rooms".equalsIgnoreCase(asset.getCategoryId().getCategoryName())) {
             redirectTarget = "/dashboard/rooms";
         }
 
-        if (user == null) {
-            redirectAttributes.addFlashAttribute("error", "User not found.");
-            return "redirect:" + redirectTarget;
-        }
-
-        if (asset == null) {
-            redirectAttributes.addFlashAttribute("error", "Asset not found.");
+        // Check if asset is null or has been removed
+        if (asset == null || (asset.getRemoved() != null && asset.getRemoved())) {
+            redirectAttributes.addFlashAttribute("error", "Asset not found or unavailable.");
             return "redirect:/dashboard";
         }
 
@@ -238,7 +339,6 @@ public class WebController {
             return "redirect:" + redirectTarget;
         }
 
-        // Create a new request
         Request newRequest = new Request();
         newRequest.setAssetId(asset);
         newRequest.setUserId(user);
@@ -263,7 +363,7 @@ public class WebController {
     }
 
     @PostMapping("/dashboard/cancel-request")
-    public String cancelRequest(@RequestParam Integer requestId, Principal principal, RedirectAttributes redirectAttributes) {
+    public String cancelRequest(@RequestParam Integer requestId, Principal principal, Model model, RedirectAttributes redirectAttributes) {
         if (principal == null) {
             return "redirect:/login";
         }
@@ -274,8 +374,8 @@ public class WebController {
             return "redirect:/dashboard";
         }
 
-        String username = principal.getName();
-        if (!request.getUserId().getUsername().equals(username)) {
+        Users user = (Users) model.getAttribute("user");
+        if (user == null || !request.getUserId().getUsername().equals(user.getUsername())) {
             redirectAttributes.addFlashAttribute("error", "Unauthorized action.");
             return "redirect:/dashboard";
         }
@@ -290,7 +390,6 @@ public class WebController {
                 .findFirst()
                 .orElse(null);
 
-        // Fallback if "Canceled" status doesn't exist yet
         if (canceledStatus == null) {
             canceledStatus = new Status();
             canceledStatus.setStatusName("Canceled");
