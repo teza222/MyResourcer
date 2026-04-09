@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout}">
+<head>
+    <title>Manage Requests - MyResourcer</title>
+</head>
+<div th:fragment="content">
+    <div class="container-fluid">
+        <h2 class="fw-bold text-dark mb-4"><i class="bi bi-file-earmark-text me-2"></i> Manage Requests</h2>
+
+        <!-- Alert Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Requests Table -->
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="border-0">User</th>
+                                <th class="border-0">Asset</th>
+                                <th class="border-0">Status</th>
+                                <th class="border-0">Collected On</th>
+                                <th class="border-0">Returned On</th>
+                                <th class="border-0 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="border-top-0">
+                            <tr th:each="request : ${requests}">
+                                <td>
+                                    <div class="fw-bold" th:text="${request.userId.fname + ' ' + request.userId.lname}"></div>
+                                    <small class="text-muted" th:text="${request.userId.username}"></small>
+                                </td>
+                                <td>
+                                    <div class="fw-bold" th:text="${request.assetId.item}"></div>
+                                    <small class="text-muted" th:text="${request.assetId.serialNumber}"></small>
+                                </td>
+                                <td>
+                                    <span class="badge px-3 py-2 rounded-pill"
+                                          th:classappend="${request.statusId.statusName == 'Approved' ? 'bg-info-subtle text-info border border-info' :
+                                                          (request.statusId.statusName == 'Pending' ? 'bg-warning-subtle text-warning border border-warning' :
+                                                          (request.statusId.statusName == 'Collected' ? 'bg-success-subtle text-success border border-success' :
+                                                          (request.statusId.statusName == 'Rejected' || request.statusId.statusName == 'Canceled' ? 'bg-danger-subtle text-danger border border-danger' :
+                                                          'bg-secondary-subtle text-secondary border border-secondary')))}"
+                                          th:text="${request.statusId.statusName}"></span>
+                                </td>
+                                <td>
+                                    <div th:text="${request.dateOut ?: '-'}"></div>
+                                    <small class="text-muted" th:text="${request.timeOut ?: ''}"></small>
+                                </td>
+                                <td>
+                                    <div th:text="${request.dateIn ?: '-'}"></div>
+                                    <small class="text-muted" th:text="${request.timeIn ?: ''}"></small>
+                                </td>
+                                <td class="text-center">
+                                    <!-- Pending Actions -->
+                                    <div th:if="${request.statusId.statusName == 'Pending'}" class="btn-group">
+                                        <form th:action="@{/admin/approve-request}" method="post" class="me-1">
+                                            <input type="hidden" name="requestId" th:value="${request.requestId}" />
+                                            <button type="submit" class="btn btn-sm btn-outline-info" title="Approve">
+                                                <i class="bi bi-check-lg"></i> Approve
+                                            </button>
+                                        </form>
+                                        <form th:action="@{/admin/reject-request}" method="post">
+                                            <input type="hidden" name="requestId" th:value="${request.requestId}" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Reject">
+                                                <i class="bi bi-x-lg"></i> Reject
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    <!-- Approved Actions (Awaiting Collection) -->
+                                    <div th:if="${request.statusId.statusName == 'Approved'}" class="btn-group">
+                                        <form th:action="@{/admin/mark-collected}" method="post" class="me-1">
+                                            <input type="hidden" name="requestId" th:value="${request.requestId}" />
+                                            <button type="submit" class="btn btn-sm btn-success" title="Collect">
+                                                <i class="bi bi-box-arrow-up me-1"></i> Collected
+                                            </button>
+                                        </form>
+                                        <form th:action="@{/admin/reject-request}" method="post">
+                                            <input type="hidden" name="requestId" th:value="${request.requestId}" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Cancel">
+                                                <i class="bi bi-x-circle me-1"></i> Cancel
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    <!-- Collected Actions (Awaiting Return) -->
+                                    <div th:if="${request.statusId.statusName == 'Collected'}">
+                                        <form th:action="@{/admin/return-request}" method="post">
+                                            <input type="hidden" name="requestId" th:value="${request.requestId}" />
+                                            <button type="submit" class="btn btn-sm btn-primary">
+                                                <i class="bi bi-arrow-return-left me-1"></i> Mark as Returned
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    <!-- Finalized Status -->
+                                    <div th:if="${request.statusId.statusName == 'Returned' || request.statusId.statusName == 'Late' || request.statusId.statusName == 'Rejected' || request.statusId.statusName == 'Canceled'}">
+                                        <span class="text-muted small italic">No actions available</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(requests)}">
+                                <td colspan="6" class="text-center py-5 text-muted">
+                                    <i class="bi bi-inbox fs-1 d-block mb-3 opacity-25"></i>
+                                    No requests found.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

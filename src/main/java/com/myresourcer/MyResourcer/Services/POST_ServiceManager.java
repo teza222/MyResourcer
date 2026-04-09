@@ -1,6 +1,7 @@
 package com.myresourcer.MyResourcer.Services;
 
 import com.myresourcer.MyResourcer.DTOs.DTO_Assets;
+import com.myresourcer.MyResourcer.DTOs.DTO_Comments;
 import com.myresourcer.MyResourcer.DTOs.DTO_Request;
 import com.myresourcer.MyResourcer.DTOs.DTO_Users;
 import com.myresourcer.MyResourcer.Models.*;
@@ -156,11 +157,24 @@ public class POST_ServiceManager {
     }
 
 
-    public boolean addComment(Comments comments) {
+    public boolean addComment(DTO_Comments comments) {
         if (comments == null) {
             return false;
         }
-        commentRepository.save(comments);
+        Comments newComments = new Comments();
+        Assets assets = new Assets();
+        assets.setAssetId(comments.getAssetId());
+        newComments.setAsset(assets);
+
+        Users users = new Users();
+        users.setId(comments.getUserId());
+        newComments.setUser(users);
+
+        newComments.setType(comments.getType());
+        newComments.setComment(comments.getComment());
+        newComments.setDateTime(comments.getDateTime());
+
+        commentRepository.save(newComments);
         return true;
     }
 }

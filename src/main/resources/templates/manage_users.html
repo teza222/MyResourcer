@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout}">
+<head>
+    <title>Manage Users - MyResourcer</title>
+</head>
+<div th:fragment="content">
+    <div class="container-fluid">
+        <h2 class="fw-bold text-dark mb-4"><i class="bi bi-people-fill me-2"></i> Manage Users</h2>
+
+        <!-- Alert Messages -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- Users Table -->
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="border-0">User Info</th>
+                                <th class="border-0">Role</th>
+                                <th class="border-0">Department</th>
+                                <th class="border-0 text-center">Flags</th>
+                                <th class="border-0 text-center">Status</th>
+                                <th class="border-0 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="border-top-0">
+                            <tr th:each="u : ${users}">
+                                <td>
+                                    <div class="fw-bold" th:text="${u.fname + ' ' + u.lname}"></div>
+                                    <small class="text-muted" th:text="${u.username}"></small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border" th:text="${u.roleId.roleName}"></span>
+                                </td>
+                                <td th:text="${u.departmentId.departmentName}"></td>
+                                <td class="text-center">
+                                    <span th:class="${u.flag >= 3 ? 'text-danger fw-bold' : (u.flag > 0 ? 'text-warning fw-bold' : 'text-muted')}"
+                                          th:text="${u.flag}">0</span>
+                                </td>
+                                <td class="text-center">
+                                    <span th:if="${u.flag >= 3}" class="badge bg-danger">Blocked</span>
+                                    <span th:if="${u.flag == 1 or u.flag == 2}" class="badge bg-warning text-dark">Warning</span>
+                                    <span th:if="${u.flag == 0}" class="badge bg-success">Active</span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group">
+                                        <!-- Reset Flags -->
+                                        <form th:action="@{/admin/reset-user-flags}" method="post" class="me-1" onsubmit="return confirm('Are you sure you want to reset flags for this user?');">
+                                            <input type="hidden" name="userId" th:value="${u.id}" />
+                                            <button type="submit" class="btn btn-sm btn-outline-success" title="Reset Flags">
+                                                <i class="bi bi-arrow-counterclockwise"></i> Reset
+                                            </button>
+                                        </form>
+
+                                        <!-- Block/Unblock -->
+                                        <form th:if="${u.flag < 3}" th:action="@{/admin/block-user}" method="post" onsubmit="return confirm('Are you sure you want to block this user?');">
+                                            <input type="hidden" name="userId" th:value="${u.id}" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Block User">
+                                                <i class="bi bi-slash-circle"></i> Block
+                                            </button>
+                                        </form>
+                                        <form th:if="${u.flag >= 3}" th:action="@{/admin/reset-user-flags}" method="post" onsubmit="return confirm('Are you sure you want to unblock this user?');">
+                                            <input type="hidden" name="userId" th:value="${u.id}" />
+                                            <button type="submit" class="btn btn-sm btn-outline-primary" title="Unblock User">
+                                                <i class="bi bi-unlock"></i> Unblock
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

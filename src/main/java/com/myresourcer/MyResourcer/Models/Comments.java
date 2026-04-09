@@ -14,14 +14,18 @@ public class Comments {
     @Column(nullable = false)
     private String DateTime;
     @ManyToOne
+    @JoinColumn(name = "assetId", nullable = false)
+    private  Assets asset;
+    @ManyToOne
     @JoinColumn(name = "id", nullable = false)
     private  Users user;
 
-    public Comments(Integer commentId, String type, String comment, String dateTime, Users user) {
+    public Comments(Integer commentId, String type, String comment, String dateTime, Assets asset, Users user) {
         this.commentId = commentId;
         this.type = type;
         this.comment = comment;
         DateTime = dateTime;
+        this.asset = asset;
         this.user = user;
     }
 
@@ -64,5 +68,12 @@ public class Comments {
     }
     public void setDateTime(String dateTime) {
         DateTime = dateTime;
+    }
+    public Assets getAsset() {
+        return asset;
+    }
+
+    public void setAsset(Assets asset) {
+        this.asset = asset;
     }
 }

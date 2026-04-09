@@ -18,8 +18,12 @@ public class Assets {
     @JoinColumn(name = "categoryId", nullable = false)
     private Categories categoryId;
     private Boolean isRemoved;
+    
+    @ManyToOne
+    @JoinColumn(name = "conditionId")
+    private Condition conditionId;
 
-    public Assets(Integer assetId, String item, Boolean mobile, String serialNumber, String specifications, Categories categoryId, Boolean isRemoved) {
+    public Assets(Integer assetId, String item, Boolean mobile, String serialNumber, String specifications, Categories categoryId, Boolean isRemoved, Condition conditionId) {
         this.assetId = assetId;
         this.item = item;
         this.isMobile = mobile;
@@ -27,6 +31,7 @@ public class Assets {
         this.specifications = specifications;
         this.categoryId = categoryId;
         this.isRemoved = isRemoved;
+        this.conditionId = conditionId; // Update constructor
     }
 
     public Assets(){
@@ -87,5 +92,14 @@ public class Assets {
 
     public void setRemoved(Boolean removed) {
         isRemoved = removed;
+    }
+
+    // Add getter and setter for conditionId
+    public Condition getConditionId() {
+        return conditionId;
+    }
+
+    public void setConditionId(Condition conditionId) {
+        this.conditionId = conditionId;
     }
 }

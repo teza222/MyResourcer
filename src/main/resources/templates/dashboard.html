@@ -67,23 +67,31 @@
                                 </thead>
                                 <tbody class="border-top-0">
                                     <tr th:each="request : ${requests}">
-                                        <td class="fw-bold" th:text="${request.assetId.item}"></td>
+                                        <td class="fw-bold" th:text="${request.assetId?.item ?: 'N/A'}"></td>
                                         <td>
                                             <span class="badge px-3 py-2 rounded-pill"
-                                                  th:classappend="${request.statusId.statusName == 'Approved' ? 'bg-success-subtle text-success border border-success' : (request.statusId.statusName == 'Canceled' ? 'bg-danger-subtle text-danger border border-danger' : 'bg-warning-subtle text-warning border border-warning')}"
-                                                  th:text="${request.statusId.statusName}"></span>
+                                                  th:with="statusName=${request.statusId?.statusName ?: 'Unknown'}"
+                                                  th:classappend="${statusName == 'Approved' ? 'bg-info-subtle text-info border border-info' :
+                                                                  (statusName == 'Pending' ? 'bg-warning-subtle text-warning border border-warning' :
+                                                                  (statusName == 'Collected' ? 'bg-success-subtle text-success border border-success' :
+                                                                  (statusName == 'Rejected' || statusName == 'Canceled' ? 'bg-danger-subtle text-danger border border-danger' :
+                                                                  (statusName == 'Late' ? 'bg-warning-subtle text-warning border border-warning' :
+                                                                  (statusName == 'Returned' ? 'bg-secondary-subtle text-secondary border border-secondary' :
+                                                                  'bg-secondary-subtle text-secondary border border-secondary')))))}"
+                                                  th:text="${statusName}"></span>
                                         </td>
                                         <td th:text="${request.dateOut}"></td>
                                         <td th:text="${request.timeOut}"></td>
                                         <td th:text="${request.dateIn}"></td>
                                         <td th:text="${request.timeIn}"></td>
                                         <td class="text-center">
-                                            <form th:if="${request.statusId.statusName == 'Pending'}" th:action="@{/dashboard/cancel-request}" method="post" onsubmit="return confirm('Are you sure you want to cancel this request?');">
+                                            <form th:if="${request.statusId?.statusName == 'Pending'}" th:action="@{/dashboard/cancel-request}" method="post" onsubmit="return confirm('Are you sure you want to cancel this request?');">
                                                 <input type="hidden" name="requestId" th:value="${request.requestId}" />
                                                 <button type="submit" class="btn btn-sm btn-outline-danger">
                                                     <i class="bi bi-x-circle me-1"></i> Cancel
                                                 </button>
                                             </form>
+                                            <span th:unless="${request.statusId?.statusName == 'Pending'}" class="text-muted small italic">No actions available</span>
                                         </td>
                                     </tr>
                                     <tr th:if="${#lists.isEmpty(requests)}">

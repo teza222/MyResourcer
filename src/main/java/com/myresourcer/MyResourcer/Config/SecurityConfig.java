@@ -26,7 +26,7 @@ public class SecurityConfig {
                     "/assets", "/assets/**", "/requests", "/requests/**", 
                     "/categories", "/categories/**", "/conditions", "/conditions/**", 
                     "/departments", "/departments/**", "/users", "/users/**", 
-                    "/roles", "/roles/**", "/statuses", "/statuses/**").permitAll()
+                    "/roles", "/roles/**", "/statuses", "/statuses/**", "/comments", "/comments/**").permitAll()
                 // All other requests (like /dashboard) require authentication
                 .anyRequest().authenticated()
             )

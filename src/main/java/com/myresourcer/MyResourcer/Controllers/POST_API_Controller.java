@@ -1,6 +1,7 @@
 package com.myresourcer.MyResourcer.Controllers;
 
 import com.myresourcer.MyResourcer.DTOs.DTO_Assets;
+import com.myresourcer.MyResourcer.DTOs.DTO_Comments;
 import com.myresourcer.MyResourcer.DTOs.DTO_Request;
 import com.myresourcer.MyResourcer.DTOs.DTO_Users;
 import com.myresourcer.MyResourcer.Models.*;
@@ -200,7 +201,7 @@ public class POST_API_Controller {
     }
 
     @PostMapping("/comments")
-    public ResponseEntity<String> addComment(@RequestBody Comments comments) {
+    public ResponseEntity<String> addComment(@RequestBody DTO_Comments comments) {
         logger.info("Adding new comment: {}", comments.getComment());
         try {boolean isCommentAdded = serviceManager.addComment(comments);
 

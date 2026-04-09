@@ -22,7 +22,15 @@
 
                     <!-- Alert for login errors -->
                     <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                        Invalid username or password.
+                        <th:block th:if="${session.SPRING_SECURITY_LAST_EXCEPTION != null}">
+                            <span th:if="${session.SPRING_SECURITY_LAST_EXCEPTION.message.toLowerCase().contains('locked')}"
+                                  th:text="'Your account is blocked due to repeated late returns. Please contact the administrator for help.'"></span>
+                            <span th:unless="${session.SPRING_SECURITY_LAST_EXCEPTION.message.toLowerCase().contains('locked')}"
+                                  th:text="'Invalid username or password.'"></span>
+                        </th:block>
+                        <th:block th:unless="${session.SPRING_SECURITY_LAST_EXCEPTION != null}">
+                            Invalid username or password.
+                        </th:block>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
 

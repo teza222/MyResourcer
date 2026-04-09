@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout}">
+<head>
+    <title>Enterprise Analytics - MyResourcer</title>
+</head>
+<div th:fragment="content">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold text-dark mb-0"><i class="bi bi-graph-up-arrow me-2"></i> Enterprise Analytics</h2>
+            <div class="btn-group shadow-sm">
+                <button class="btn btn-white border bg-white small" onclick="window.print()"><i class="bi bi-printer me-1"></i> Print Report</button>
+            </div>
+        </div>
+
+        <!-- Tier 1: Summary Cards -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0 rounded-3 text-white bg-primary">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title mb-0" th:text="${totalAssets}"></h5>
+                                <p class="card-text small mb-0">Active Assets</p>
+                            </div>
+                            <div class="bg-white bg-opacity-25 rounded-circle p-3"><i class="bi bi-box-seam fs-4"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0 rounded-3 text-white bg-success">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title mb-0" th:text="${totalUsers}"></h5>
+                                <p class="card-text small mb-0">Total Users</p>
+                            </div>
+                            <div class="bg-white bg-opacity-25 rounded-circle p-3"><i class="bi bi-people-fill fs-4"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0 rounded-3 text-white bg-info">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title mb-0" th:text="${totalRequests}"></h5>
+                                <p class="card-text small mb-0">Total Requests</p>
+                            </div>
+                            <div class="bg-white bg-opacity-25 rounded-circle p-3"><i class="bi bi-file-earmark-text fs-4"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0 rounded-3 text-white bg-danger">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title mb-0" th:text="${lateReturns}"></h5>
+                                <p class="card-text small mb-0">Late Returns</p>
+                            </div>
+                            <div class="bg-white bg-opacity-25 rounded-circle p-3"><i class="bi bi-exclamation-octagon fs-4"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tier 2: Graphical Insights -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="card shadow-sm border-0 rounded-3 h-100">
+                    <div class="card-header bg-white border-0 p-4">
+                        <h5 class="fw-bold mb-0">Asset Distribution by Category</h5>
+                    </div>
+                    <div class="card-body p-4" style="height: 350px;">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0 rounded-3 h-100">
+                    <div class="card-header bg-white border-0 p-4">
+                        <h5 class="fw-bold mb-0">Request Status</h5>
+                    </div>
+                    <div class="card-body p-4" style="height: 350px;">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card shadow-sm border-0 rounded-3 h-100">
+                    <div class="card-header bg-white border-0 p-4">
+                        <h5 class="fw-bold mb-0">Asset Health</h5>
+                    </div>
+                    <div class="card-body p-4" style="height: 350px;">
+                        <canvas id="conditionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tier 3: Searchable Reports -->
+        <div class="card shadow-sm border-0 rounded-3 mb-4">
+            <div class="card-header bg-white border-0 p-4 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0"><i class="bi bi-list-check me-2 text-primary"></i> Live Asset Status Report</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table id="assetsReportTable" class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Asset Item</th>
+                                <th>Serial Number</th>
+                                <th>Category</th>
+                                <th>Current Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="report : ${assetReports}">
+                                <td class="fw-bold" th:text="${report.item}"></td>
+                                <td th:text="${report.serial}"></td>
+                                <td th:text="${report.category}"></td>
+                                <td>
+                                    <span th:class="${report.status == 'Available' ? 'badge bg-success' : 'badge bg-warning'}"
+                                          th:text="${report.status}"></span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tier 3.5: Deleted Assets Report -->
+        <div class="card shadow-sm border-0 rounded-3 mb-4">
+            <div class="card-header bg-white border-0 p-4 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-danger"><i class="bi bi-trash3 me-2"></i> Deleted Assets Archive</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table id="deletedAssetsTable" class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Asset Item</th>
+                                <th>Serial Number</th>
+                                <th>Category</th>
+                                <th>Specifications</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="asset : ${deletedAssets}">
+                                <td class="fw-bold" th:text="${asset.item}"></td>
+                                <td th:text="${asset.serialNumber}"></td>
+                                <td th:text="${asset.categoryId.categoryName}"></td>
+                                <td class="small text-muted" th:text="${asset.specifications}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 rounded-3 mb-5">
+            <div class="card-header bg-white border-0 p-4">
+                <h5 class="fw-bold mb-0"><i class="bi bi-chat-left-text me-2 text-info"></i> Activity Logs & Comments</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table id="commentsTable" class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Asset Context</th>
+                                <th>Action By</th>
+                                <th>Log Type</th>
+                                <th>Comment Detail</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="c : ${comments}">
+                                <td class="small" th:text="${c.dateTime}"></td>
+                                <td class="fw-bold" th:text="${c.asset != null ? c.asset.item : 'N/A'}"></td>
+                                <td th:text="${c.user != null ? c.user.username : 'System'}"></td>
+                                <td><span class="badge bg-light text-dark border" th:text="${c.type}"></span></td>
+                                <td class="small text-muted" th:text="${c.comment}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tier 4: Organizational Analytics -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="card shadow-sm border-0 rounded-3 h-100">
+                    <div class="card-header bg-white border-0 p-4">
+                        <h5 class="fw-bold mb-0">Departmental Engagement</h5>
+                    </div>
+                    <div class="card-body p-4" style="height: 350px;">
+                        <canvas id="deptChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-sm border-0 rounded-3 h-100">
+                    <div class="card-header bg-white border-0 p-4">
+                        <h5 class="fw-bold mb-0">User Leaderboard</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle border-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Username</th>
+                                        <th class="text-end">Activity</th>
+                                        <th style="width: 150px;">Weight</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="entry : ${topUsers}">
+                                        <td class="fw-bold" th:text="${entry.key}"></td>
+                                        <td class="text-end" th:text="${entry.value}"></td>
+                                        <td>
+                                            <div class="progress rounded-pill" style="height: 6px;">
+                                                <div class="progress-bar bg-success" role="progressbar"
+                                                     th:style="'width: ' + (${totalRequests > 0 ? (entry.value * 100 / totalRequests) : 0}) + '%'"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script th:inline="javascript">
+        /* Thymeleaf Data Inlining */
+        const assetsByCategory = /*[[${assetsByCategory}]]*/ {};
+        const requestsByStatus = /*[[${requestsByStatus}]]*/ {};
+        const assetsByCondition = /*[[${assetsByCondition}]]*/ {};
+        const requestsByDepartment = /*[[${requestsByDepartment}]]*/ {};
+
+        $(document).ready(function() {
+            /* DataTables Initialization */
+            $('#assetsReportTable').DataTable({"pageLength": 10});
+            $('#deletedAssetsTable').DataTable({"pageLength": 10});
+            $('#commentsTable').DataTable({"pageLength": 10, "order": [ [ 0, "desc" ] ]});
+
+            /* Chart.js Global Default Overrides */
+            Chart.defaults.font.family = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+            Chart.defaults.color = '#6c757d';
+
+            // 1. Bar Chart (Category)
+            new Chart(document.getElementById('categoryChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(assetsByCategory),
+                    datasets: [{
+                        label: 'Assets',
+                        data: Object.values(assetsByCategory),
+                        backgroundColor: '#0d6efd',
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true }, x: { grid: { display: false } } }
+                }
+            });
+
+            // 2. Doughnut Chart (Status)
+            new Chart(document.getElementById('statusChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(requestsByStatus),
+                    datasets: [{
+                        data: Object.values(requestsByStatus),
+                        backgroundColor: ['#ffc107', '#198754', '#dc3545', '#0dcaf0', '#6c757d'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 15 } } }
+                }
+            });
+
+            // 3. Pie Chart (Condition)
+            new Chart(document.getElementById('conditionChart'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(assetsByCondition),
+                    datasets: [{
+                        data: Object.values(assetsByCondition),
+                        backgroundColor: ['#198754', '#ffc107', '#fd7e14', '#dc3545'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 15 } } }
+                }
+            });
+
+            // 4. Radar Chart (Department)
+            new Chart(document.getElementById('deptChart'), {
+                type: 'radar',
+                data: {
+                    labels: Object.keys(requestsByDepartment),
+                    datasets: [{
+                        label: 'Request Volume',
+                        data: Object.values(requestsByDepartment),
+                        fill: true,
+                        backgroundColor: 'rgba(13, 110, 253, 0.15)',
+                        borderColor: 'rgb(13, 110, 253)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgb(13, 110, 253)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(13, 110, 253)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            suggestedMin: 0,
+                            ticks: { display: false },
+                            angleLines: { color: 'rgba(0,0,0,0.05)' },
+                            grid: { color: 'rgba(0,0,0,0.05)' }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</div>
+</html>

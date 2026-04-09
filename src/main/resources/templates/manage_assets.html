@@ -33,6 +33,7 @@
                                 <th class="border-0">Item Name</th>
                                 <th class="border-0">Category</th>
                                 <th class="border-0">Serial Number</th>
+                                <th class="border-0">Condition</th>
                                 <th class="border-0">Type</th>
                                 <th class="border-0 text-center">Actions</th>
                             </tr>
@@ -44,20 +45,35 @@
                                 <td th:text="${asset.categoryId.categoryName}"></td>
                                 <td th:text="${asset.serialNumber}"></td>
                                 <td>
+                                    <span th:if="${asset.conditionId != null}"
+                                          th:class="'badge ' + (${asset.conditionId.conditionName == 'Working' ? 'bg-success' : 'bg-warning text-dark'})"
+                                          th:text="${asset.conditionId.conditionName}"></span>
+                                    <span th:unless="${asset.conditionId != null}" class="badge bg-secondary">Unknown</span>
+                                </td>
+                                <td>
                                     <span th:if="${asset.mobile}" class="badge bg-info text-dark">Mobile</span>
                                     <span th:unless="${asset.mobile}" class="badge bg-secondary">Fixed</span>
                                 </td>
                                 <td class="text-center">
-                                    <form th:action="@{/admin/delete-asset}" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to remove this asset?');">
-                                        <input type="hidden" name="assetId" th:value="${asset.assetId}" />
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary"
+                                                data-bs-toggle="modal" data-bs-target="#editConditionModal"
+                                                th:data-asset-id="${asset.assetId}"
+                                                th:data-asset-name="${asset.item}"
+                                                th:data-condition-id="${asset.conditionId != null ? asset.conditionId.conditionId : ''}">
+                                            <i class="bi bi-pencil-square"></i> Edit
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                                data-bs-toggle="modal" data-bs-target="#deleteAssetModal"
+                                                th:data-asset-id="${asset.assetId}"
+                                                th:data-asset-name="${asset.item}">
                                             <i class="bi bi-trash"></i> Delete
                                         </button>
-                                    </form>
+                                    </div>
                                 </td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(assets)}">
-                                <td colspan="6" class="text-center py-5 text-muted">
+                                <td colspan="7" class="text-center py-5 text-muted">
                                     No assets found. Click "Add New Asset" to get started.
                                 </td>
                             </tr>
@@ -110,5 +126,92 @@
             </div>
         </div>
     </div>
+
+    <!-- Edit Condition Modal -->
+    <div class="modal fade" id="editConditionModal" tabindex="-1" aria-labelledby="editConditionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white border-0">
+                    <h5 class="modal-title fw-bold" id="editConditionModalLabel">Update Asset Condition</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form th:action="@{/admin/edit-asset-condition}" method="post">
+                    <div class="modal-body p-4">
+                        <p>Updating condition for: <span id="editConditionAssetName" class="fw-bold"></span></p>
+                        <input type="hidden" id="editConditionAssetId" name="assetId">
+                        <div class="mb-3">
+                            <label for="conditionId" class="form-label">Current Condition</label>
+                            <select class="form-select" id="editConditionId" name="conditionId" required>
+                                <option th:each="cond : ${conditions}" th:value="${cond.conditionId}" th:text="${cond.conditionName}"></option>
+                            </select>
+                            <div class="form-text mt-2 text-warning">
+                                <i class="bi bi-info-circle me-1"></i> Assets not in "Working" condition will be hidden from regular users.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary px-4">Update Condition</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Asset Modal -->
+    <div class="modal fade" id="deleteAssetModal" tabindex="-1" aria-labelledby="deleteAssetModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-danger text-white border-0">
+                    <h5 class="modal-title fw-bold" id="deleteAssetModalLabel">Confirm Removal</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form th:action="@{/admin/delete-asset}" method="post">
+                    <div class="modal-body p-4">
+                        <p>Are you sure you want to remove <span id="deleteAssetName" class="fw-bold"></span>?</p>
+                        <input type="hidden" id="deleteAssetId" name="assetId">
+                        <div class="mb-3">
+                            <label for="comment" class="form-label">Reason for Removal</label>
+                            <textarea class="form-control" id="comment" name="comment" rows="3" required placeholder="Please provide a reason for deleting this asset..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger px-4">Remove Asset</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const deleteModal = document.getElementById('deleteAssetModal');
+            if (deleteModal) {
+                deleteModal.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    const assetId = button.getAttribute('data-asset-id');
+                    const assetName = button.getAttribute('data-asset-name');
+
+                    document.getElementById('deleteAssetId').value = assetId;
+                    document.getElementById('deleteAssetName').textContent = assetName;
+                });
+            }
+
+            const editModal = document.getElementById('editConditionModal');
+            if (editModal) {
+                editModal.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    const assetId = button.getAttribute('data-asset-id');
+                    const assetName = button.getAttribute('data-asset-name');
+                    const conditionId = button.getAttribute('data-condition-id');
+
+                    document.getElementById('editConditionAssetId').value = assetId;
+                    document.getElementById('editConditionAssetName').textContent = assetName;
+                    document.getElementById('editConditionId').value = conditionId;
+                });
+            }
+        });
+    </script>
 </div>
 </html>
