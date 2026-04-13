@@ -1,4 +1,4 @@
-package com.myresourcer.TCPClient;
+package com.myresourcer.TCPClientServer;
 
 import java.io.IOException;
 import java.net.ServerSocket;
