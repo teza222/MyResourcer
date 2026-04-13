@@ -2,6 +2,7 @@ package com.myresourcer.MyResourcer;
 
 import com.myresourcer.MyResourcer.DTOs.DTO_Assets;
 import com.myresourcer.MyResourcer.DTOs.DTO_Request;
+import com.myresourcer.MyResourcer.DTOs.DTO_Users;
 import com.myresourcer.MyResourcer.Models.*;
 import com.myresourcer.MyResourcer.Repositories.*;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 public class AllPostEndpointsTest {
 
     @Autowired
@@ -42,20 +43,18 @@ public class AllPostEndpointsTest {
 
     @Test
     public void testAddRequest() throws Exception {
-        // Setup mock entities with IDs
         Roles role = new Roles(1, "Test Role");
         Departments dept = new Departments(1, "Test Dept");
         Categories cat = new Categories(1, "Test Category");
         Status status = new Status(1, "Test Status");
         Condition condition = new Condition(1, "Test Condition");
 
-        Users user = new Users(1, "testuser_req", "password", "Test", "User", role, dept, 1);
-        Assets asset = new Assets(1, "Test Asset", true, "SN_REQ", "Specs", cat, false);
+        Users userEntity = new Users(1, "testuser_req", "password", "Test", "User", role, dept, 1);
+        DTO_Assets asset = new DTO_Assets(1, "Test Asset", true, "SN_REQ", "Specs", 2, false);
 
-        // Create the DTO
         DTO_Request request = new DTO_Request();
         request.setAssetId(asset.getAssetId());
-        request.setUserId(user.getId());
+        request.setUserId(userEntity.getId());
         request.setStatusId(status.getStatusId());
         request.setConditionId(condition.getConditionId());
         request.setDateOut("2026-03-10");
@@ -125,19 +124,21 @@ public class AllPostEndpointsTest {
 
     @Test
     public void testAddUser() throws Exception {
-        Roles savedRole = new Roles(1, "Test Role");
-        Departments savedDept = new Departments(1, "Test Dept");
-        
-        // Ensure role and department can be found if validated by controller
-        when(roleRepository.findById(1)).thenReturn(Optional.of(savedRole));
-        when(departmentRepository.findById(1)).thenReturn(Optional.of(savedDept));
+        DTO_Users userDto = new DTO_Users();
+        userDto.setUsername("testuser");
+        userDto.setPassword("password");
+        userDto.setFname("Test");
+        userDto.setLname("User");
+        userDto.setRoleId(1);
+        userDto.setDepartmentId(1);
+        userDto.setFlag(0);
 
-        Users user = new Users(null, "testuser", "password", "Test", "User", savedRole, savedDept, 1);
-        when(userRepository.save(any(Users.class))).thenReturn(user);
+        // Mock repository save call
+        when(userRepository.save(any(Users.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         mockMvc.perform(post("/users")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user)))
+                        .content(objectMapper.writeValueAsString(userDto)))
                 .andExpect(status().isCreated())
                 .andExpect(content().string("User Successfully Added"));
     }
