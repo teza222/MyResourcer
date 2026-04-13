@@ -2,6 +2,7 @@ package com.myresourcer.MyResourcer.Config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -21,15 +22,12 @@ public class SecurityConfig {
             .authorizeHttpRequests((requests) -> requests
                 // Permit public access to web pages and static resources
                 .requestMatchers("/", "/register", "/login", "/css/**", "/js/**", "/images/**").permitAll()
-                // Permit public access to API endpoints for testing via Postman
-                .requestMatchers(
-                    "/assets", "/assets/**", "/requests", "/requests/**", 
-                    "/categories", "/categories/**", "/conditions", "/conditions/**", 
-                    "/departments", "/departments/**", "/users", "/users/**", 
-                    "/roles", "/roles/**", "/statuses", "/statuses/**", "/comments", "/comments/**").permitAll()
-                // All other requests (like /dashboard) require authentication
+                // All other requests (like /dashboard and API endpoints) require authentication
                 .anyRequest().authenticated()
             )
+            // Enable HTTP Basic authentication for API testing
+            .httpBasic(Customizer.withDefaults())
+            // Enable Form Login for browser-based access
             .formLogin((form) -> form
                 .loginPage("/login")
                 .defaultSuccessUrl("/dashboard", true)

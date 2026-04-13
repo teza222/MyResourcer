@@ -172,7 +172,7 @@ public class POST_ServiceManager {
 
         newComments.setType(comments.getType());
         newComments.setComment(comments.getComment());
-        newComments.setDateTime(comments.getDateTime());
+        newComments. setDateTime(comments.getDateTime());
 
         commentRepository.save(newComments);
         return true;

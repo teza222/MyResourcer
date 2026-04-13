@@ -1,4 +1,4 @@
-package com.myresourcer.TCPClient;
+package com.myresourcer.TCPClientServer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,7 +15,8 @@ public class ClientHandler implements Runnable {
 
     private final Socket clientSocket;
     private final HttpClient httpClient;
-    private static final String API_BASE_URL = "http://localhost:8080"; // Your Spring Boot URL
+    private String authHeader = null; // Store Basic Auth header per session
+    private static final String API_BASE_URL = "http://localhost:8080";
 
     public ClientHandler(Socket socket) {
         this.clientSocket = socket;
@@ -31,17 +32,31 @@ public class ClientHandler implements Runnable {
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)
         ) {
-            out.println("CONNECTED TO SERVER ENGINE. FORMAT: [METHOD] [ENDPOINT] [JSON_BODY]");
+            out.println("CONNECTED TO SERVER ENGINE. PLEASE AUTHENTICATE.");
             
             String requestLine;
             while ((requestLine = in.readLine()) != null) {
-                if ("EXIT".equalsIgnoreCase(requestLine.trim())) {
+                String input = requestLine.trim();
+                
+                if ("EXIT".equalsIgnoreCase(input)) {
                     out.println("Goodbye.");
                     break;
                 }
 
-                System.out.println("Received: " + requestLine);
-                String response = sendRequestToSpringBoot(requestLine);
+                // Handle Authentication Command
+                if (input.startsWith("AUTH ")) {
+                    this.authHeader = "Basic " + input.substring(5);
+                    out.println("AUTH_SUCCESS: Authentication header set for session.");
+                    continue;
+                }
+
+                if (this.authHeader == null) {
+                    out.println("ERROR: NOT AUTHENTICATED. USE 'AUTH [base64_creds]' FIRST.");
+                    continue;
+                }
+
+                System.out.println("Processing: " + input);
+                String response = sendRequestToSpringBoot(input);
                 out.println(response);
             }
 
@@ -58,7 +73,6 @@ public class ClientHandler implements Runnable {
 
     private String sendRequestToSpringBoot(String input) {
         try {
-            // Simple parsing: expects "METHOD /path {json}"
             String[] parts = input.split(" ", 3);
             String method = parts[0].toUpperCase();
             String path = parts[1];
@@ -68,7 +82,8 @@ public class ClientHandler implements Runnable {
 
             HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                     .uri(URI.create(API_BASE_URL + path))
-                    .header("Content-Type", "application/json");
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", this.authHeader); // Use stored auth header
 
             switch (method) {
                 case "GET":
