@@ -1,10 +1,10 @@
 package com.myresourcer.MyResourcer.WEB_Controllers;
 
-import com.myresourcer.MyResourcer.Controllers.POST_API_Controller;
 import com.myresourcer.MyResourcer.DTOs.DTO_Comments;
 import com.myresourcer.MyResourcer.DTOs.DTO_Users;
 import com.myresourcer.MyResourcer.Models.*;
 import com.myresourcer.MyResourcer.Repositories.*;
+import com.myresourcer.MyResourcer.Services.EMAIL_ServiceManager;
 import com.myresourcer.MyResourcer.Services.GET_ServiceManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,6 +27,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Controller
@@ -64,6 +65,9 @@ public class WebController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EMAIL_ServiceManager emailService;
 
     private static final Logger logger = LogManager.getLogger(WebController.class);
 
@@ -111,6 +115,7 @@ public class WebController {
         newUser.setPassword(passwordEncoder.encode(user.getPassword()));
         newUser.setFname(user.getFname());
         newUser.setLname(user.getLname());
+        newUser.setEmail(user.getEmail());
         newUser.setRoleId(role);
         newUser.setDepartmentId(department);
         newUser.setFlag(0); // Initialize flag at 0
@@ -341,6 +346,19 @@ public class WebController {
         
         requestRepository.save(request);
         logger.info("Approved request with ID: {}, by user: {}", requestId, request.getUserId().getUsername());
+
+        // Send Email to user
+        String subject = "Asset Request Approved";
+        String body = "Hello " + request.getUserId().getFname() + ",\n\n" +
+                "Your request for the asset '" + request.getAssetId().getItem() + "' (Serial: " + request.getAssetId().getSerialNumber() + ") has been APPROVED.\n\n" +
+                "You can now proceed to collect the asset from the administration office.\n\n" +
+                "Thank you.";
+        try {
+            emailService.sendEmail(request.getUserId().getEmail(), subject, body);
+        } catch (Exception e) {
+            logger.error("Failed to send approval email to: {}", request.getUserId().getEmail(), e);
+        }
+
         redirectAttributes.addFlashAttribute("success", "Request for " + request.getAssetId().getItem() + " approved. Awaiting collection.");
         return "redirect:/admin/manage-requests";
     }
@@ -376,7 +394,7 @@ public class WebController {
     }
 
     @PostMapping("/admin/reject-request")
-    public String rejectRequest(@RequestParam Integer requestId, RedirectAttributes redirectAttributes) {
+    public String rejectRequest(@RequestParam Integer requestId, @RequestParam String reason, RedirectAttributes redirectAttributes) {
         Request request = requestRepository.findById(requestId).orElse(null);
         if (request == null) {
             redirectAttributes.addFlashAttribute("error", "Request not found.");
@@ -400,6 +418,20 @@ public class WebController {
         request.setTimeIn(LocalTime.now().withNano(0).toString());
         requestRepository.save(request);
         logger.info("Rejected request with ID: {}, by user: {}", requestId, request.getUserId());
+
+        // Send Email to user with reason
+        String subject = "Asset Request Rejected";
+        String body = "Hello " + request.getUserId().getFname() + ",\n\n" +
+                "Your request for the asset '" + request.getAssetId().getItem() + "' has been REJECTED / CANCELED.\n\n" +
+                "Reason provided: " + reason + "\n\n" +
+                "If you have any questions, please contact the administrator.\n\n" +
+                "Thank you.";
+        try {
+            emailService.sendEmail(request.getUserId().getEmail(), subject, body);
+        } catch (Exception e) {
+            logger.error("Failed to send rejection email to: {}", request.getUserId().getEmail(), e);
+        }
+
         redirectAttributes.addFlashAttribute("success", "Request for " + request.getAssetId().getItem() + " rejected.");
         return "redirect:/admin/manage-requests";
     }
@@ -895,5 +927,39 @@ public class WebController {
         logger.info("Request with ID: {}, canceled by: {}", requestId, user.getUsername());
         redirectAttributes.addFlashAttribute("success", "Request for " + request.getAssetId().getItem() + " has been canceled.");
         return "redirect:/dashboard";
+    }
+
+    @GetMapping("/forgot-password")
+    public String forgotPassword(Model model) {
+        model.addAttribute("hideNavbar", false);
+        return "forgot_password";
+    }
+
+    @PostMapping("/forgot-password")
+    public String processForgotPassword(@RequestParam String email, RedirectAttributes redirectAttributes) {
+        userRepository.findByEmail(email).ifPresentOrElse(user -> {
+            // send email
+            String token = UUID.randomUUID().toString();
+
+            String resetLink = "http://localhost:8080/reset-password?token=" + token;
+            String subject = "Password Reset Request";
+            String body = "Hello " + user.getFname() + ",\n\n" +
+                    "You requested a password reset. Please click the link below to reset your password:\n" +
+                    resetLink + "\n\n" +
+                    "If you did not request this, please ignore this email.";
+            
+            try {
+                emailService.sendEmail(user.getEmail(), subject, body);
+                logger.info("Password reset email sent to: {}", email);
+            } catch (Exception e) {
+                logger.error("Failed to send password reset email to: {}", email, e);
+            }
+
+            redirectAttributes.addFlashAttribute("success", "If an account with that email exists, a password reset link has been sent.");
+        }, () -> {
+            logger.warn("Password reset attempted for non-existent email: {}", email);
+            redirectAttributes.addFlashAttribute("success", "If an account with that email exists, a password reset link has been sent.");
+        });
+        return "redirect:/login";
     }
 }

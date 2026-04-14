@@ -6,6 +6,7 @@ public class DTO_Users {
     private String password;
     private String fname;
     private String lname;
+    private String email;
     private Integer roleId;
     private Integer departmentId;
     private Integer flag;
@@ -13,12 +14,13 @@ public class DTO_Users {
     public DTO_Users() {
     }
 
-    public DTO_Users(Integer id, String username, String password, String fname, String lname, Integer roleId, Integer departmentId, Integer flag) {
+    public DTO_Users(Integer id, String username, String password, String fname, String lname, String email, Integer roleId, Integer departmentId, Integer flag) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.fname = fname;
         this.lname = lname;
+        this.email = email;
         this.roleId = roleId;
         this.departmentId = departmentId;
         this.flag = flag;
@@ -62,6 +64,14 @@ public class DTO_Users {
 
     public void setLname(String lname) {
         this.lname = lname;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public Integer getRoleId() {

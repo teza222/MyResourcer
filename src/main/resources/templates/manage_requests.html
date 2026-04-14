@@ -68,15 +68,13 @@
                                                 <i class="bi bi-check-lg"></i> Approve
                                             </button>
                                         </form>
-                                        <form th:action="@{/admin/reject-request}" method="post">
-                                            <input type="hidden" name="requestId" th:value="${request.requestId}" />
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Reject">
-                                                <i class="bi bi-x-lg"></i> Reject
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" title="Reject"
+                                                data-bs-toggle="modal" th:data-bs-target="'#rejectModal' + ${request.requestId}">
+                                            <i class="bi bi-x-lg"></i> Reject
+                                        </button>
                                     </div>
 
-                                    <!-- Approved Actions (Awaiting Collection) -->
+                                    <!-- Approved Actions  -->
                                     <div th:if="${request.statusId.statusName == 'Approved'}" class="btn-group">
                                         <form th:action="@{/admin/mark-collected}" method="post" class="me-1">
                                             <input type="hidden" name="requestId" th:value="${request.requestId}" />
@@ -84,15 +82,13 @@
                                                 <i class="bi bi-box-arrow-up me-1"></i> Collected
                                             </button>
                                         </form>
-                                        <form th:action="@{/admin/reject-request}" method="post">
-                                            <input type="hidden" name="requestId" th:value="${request.requestId}" />
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Cancel">
-                                                <i class="bi bi-x-circle me-1"></i> Cancel
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" title="Cancel"
+                                                data-bs-toggle="modal" th:data-bs-target="'#rejectModal' + ${request.requestId}">
+                                            <i class="bi bi-x-circle me-1"></i> Cancel
+                                        </button>
                                     </div>
 
-                                    <!-- Collected Actions (Awaiting Return) -->
+                                    <!-- Collected Actions  -->
                                     <div th:if="${request.statusId.statusName == 'Collected'}">
                                         <form th:action="@{/admin/return-request}" method="post">
                                             <input type="hidden" name="requestId" th:value="${request.requestId}" />
@@ -105,6 +101,31 @@
                                     <!-- Finalized Status -->
                                     <div th:if="${request.statusId.statusName == 'Returned' || request.statusId.statusName == 'Late' || request.statusId.statusName == 'Rejected' || request.statusId.statusName == 'Canceled'}">
                                         <span class="text-muted small italic">No actions available</span>
+                                    </div>
+
+                                    <!-- Reject Modal -->
+                                    <div class="modal fade" th:id="'rejectModal' + ${request.requestId}" tabindex="-1" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content text-start">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title fw-bold">Provide Reason for Rejection</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <form th:action="@{/admin/reject-request}" method="post">
+                                                    <div class="modal-body">
+                                                        <input type="hidden" name="requestId" th:value="${request.requestId}" />
+                                                        <div class="mb-3">
+                                                            <label class="form-label">Reason for rejection / cancellation:</label>
+                                                            <textarea name="reason" class="form-control" rows="3" required placeholder="Enter reason here..."></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                        <button type="submit" class="btn btn-danger">Submit & Reject</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>

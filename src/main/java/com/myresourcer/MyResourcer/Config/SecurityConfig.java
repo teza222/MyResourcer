@@ -1,5 +1,6 @@
 package com.myresourcer.MyResourcer.Config;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -21,12 +22,14 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests((requests) -> requests
                 // Permit public access to web pages and static resources
-                .requestMatchers("/", "/register", "/login", "/css/**", "/js/**", "/images/**").permitAll()
-                // All other requests (like /dashboard and API endpoints) require authentication
+                .requestMatchers("/", "/register", "/login", "/forgot-password", "/reset-password", "/css/**", "/js/**", "/images/**").permitAll()
+                // All other requests require authentication
                 .anyRequest().authenticated()
             )
-            // Enable HTTP Basic authentication for API testing
-            .httpBasic(Customizer.withDefaults())
+            // Configure HTTP Basic authentication
+            .httpBasic(basic -> basic.authenticationEntryPoint((request, response, authException) -> {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
+            }))
             // Enable Form Login for browser-based access
             .formLogin((form) -> form
                 .loginPage("/login")

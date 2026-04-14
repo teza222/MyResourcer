@@ -16,6 +16,8 @@ public class Users {
     private String fname;
     @Column(nullable = false)
     private String lname;
+    @Column(nullable = false, unique = true)
+    private String email;
     @ManyToOne
     @JoinColumn(name = "roleId", nullable = false)
     private Roles roleId;
@@ -24,12 +26,13 @@ public class Users {
     private Departments departmentId;
     private Integer flag;
 
-    public Users(Integer id, String username, String password, String fname, String lname, Roles roleId, Departments departmentId, Integer flag) {
+    public Users(Integer id, String username, String password, String fname, String lname, String email, Roles roleId, Departments departmentId, Integer flag) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.fname = fname;
         this.lname = lname;
+        this.email = email;
         this.roleId = roleId;
         this.departmentId = departmentId;
         this.flag = flag;
@@ -77,6 +80,14 @@ public class Users {
 
     public void setLname(String lname) {
         this.lname = lname;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public Roles getRoleId() {
