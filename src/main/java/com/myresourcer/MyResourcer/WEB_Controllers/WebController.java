@@ -5,7 +5,7 @@ import com.myresourcer.MyResourcer.DTOs.DTO_Users;
 import com.myresourcer.MyResourcer.Models.*;
 import com.myresourcer.MyResourcer.Repositories.*;
 import com.myresourcer.MyResourcer.Services.EMAIL_ServiceManager;
-import com.myresourcer.MyResourcer.Services.GET_ServiceManager;
+import com.myresourcer.MyResourcer.Services.READ_ServiceManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 public class WebController {
 
     @Autowired
-    private GET_ServiceManager serviceManager;
+    private READ_ServiceManager serviceManager;
 
     @Autowired
     private User_Repository userRepository;
@@ -175,7 +175,7 @@ public class WebController {
         // Filter out removed assets for the count
         model.addAttribute("assetCount", assetRepository.findAll().stream().filter(a -> a.getRemoved() == null || !a.getRemoved()).count());
         model.addAttribute("userCount", serviceManager.getAllUsers().size());
-        model.addAttribute("requestCount", serviceManager.getAllRequests().size());
+        model.addAttribute("requestCount", serviceManager.getRequestTotal());
         model.addAttribute("categoryCount", serviceManager.getAllCategories().size());
         
         model.addAttribute("pendingRequestsCount", requestRepository.findAll().stream()

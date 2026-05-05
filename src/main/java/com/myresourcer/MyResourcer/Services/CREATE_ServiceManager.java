@@ -7,10 +7,11 @@ import com.myresourcer.MyResourcer.DTOs.DTO_Users;
 import com.myresourcer.MyResourcer.Models.*;
 import com.myresourcer.MyResourcer.Repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
-public class POST_ServiceManager {
+public class CREATE_ServiceManager {
 
     @Autowired
     Request_Repository requestRepository;
@@ -37,36 +38,37 @@ public class POST_ServiceManager {
     @Autowired
     Comment_Repository commentRepository;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
 
-    public POST_ServiceManager() {
+
+    public CREATE_ServiceManager() {
     }
 
 
     public boolean addRequest(DTO_Request request) {
-        if (request != null) {
-            Request formattedRequest = new Request();
-            Assets assets = new Assets();
-            assets.setAssetId(request.getAssetId());
-            formattedRequest.setAssetId(assets);
-            Users users = new Users();
-            users.setId(request.getUserId());
-            formattedRequest.setUserId(users);
-            Status status = new Status();
-            status.setStatusId(request.getStatusId());
-            formattedRequest.setStatusId(status);
-            Condition condition = new Condition();
-            condition.setConditionId(request.getConditionId());
-            formattedRequest.setConditionId(condition);
-            formattedRequest.setDateOut(request.getDateOut());
-            formattedRequest.setDateIn(request.getDateIn());
-            formattedRequest.setTimeOut(request.getTimeOut());
-            formattedRequest.setTimeIn(request.getTimeIn());
-            requestRepository.save(formattedRequest);
-            return true;
-        } else {
+
+        if (request == null) {
             return false;
         }
+
+        String sql = "INSERT INTO request (asset_id, id, status_id, condition_id, " +
+                "date_out, date_in, time_out, time_in) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+        int result = jdbcTemplate.update(sql,
+                request.getAssetId(),
+                request.getUserId(),
+                request.getStatusId(),
+                request.getConditionId(),
+                request.getDateOut(),
+                request.getDateIn(),
+                request.getTimeOut(),
+                request.getTimeIn()
+        );
+
+        return result > 0;
     }
 
 

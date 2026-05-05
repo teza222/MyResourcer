@@ -5,12 +5,15 @@ import com.myresourcer.MyResourcer.DTOs.DTO_Request;
 import com.myresourcer.MyResourcer.Models.*;
 import com.myresourcer.MyResourcer.Repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
-public class PUT_ServiceManager {
+public class UPDATE_ServiceManager {
 
     @Autowired
     Request_Repository requestRepository;
@@ -34,49 +37,71 @@ public class PUT_ServiceManager {
     @Autowired
     Status_Repository statusRepository;
 
-    public PUT_ServiceManager() {
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
+    public UPDATE_ServiceManager() {
     }
 
 
     public boolean updateRequest(Integer id, DTO_Request requestData) {
 
-        //return if any of these field are null
         if (requestData == null || id == null) {
             return false;
         }
-        // Check if the request with the given ID exists
-        Optional<Request> existingRequestOpt = requestRepository.findById(id);
 
-        if (existingRequestOpt.isPresent()) {
-            Request requestToUpdate = existingRequestOpt.get();
+        // First check if the request exists
+        String checkSql = "SELECT COUNT(*) FROM request WHERE request_id = ?";
+        Integer count = jdbcTemplate.queryForObject(checkSql, new Object[]{id}, Integer.class);
 
-            // Updating fields
-            if (requestData.getAssetId() != null) {
-                Assets asset = new Assets();
-                asset.setAssetId(requestData.getAssetId());
-                requestToUpdate.setAssetId(asset);
-            }
-            if (requestData.getUserId() != null) {
-                Users user = new Users();
-                user.setId(requestData.getUserId());
-                requestToUpdate.setUserId(user);
-            }
-            if (requestData.getStatusId() != null) {
-                Status status = new Status();
-                status.setStatusId(requestData.getStatusId());
-                requestToUpdate.setStatusId(status);
-            }
-            if (requestData.getConditionId() != null) {
-                Condition condition = new Condition();
-                condition.setConditionId(requestData.getConditionId());
-                requestToUpdate.setConditionId(condition);
-            }
-            if (requestData.getDateOut() != null) requestToUpdate.setDateOut(requestData.getDateOut());
-            if (requestData.getDateIn() != null) requestToUpdate.setDateIn(requestData.getDateIn());
-            if (requestData.getTimeOut() != null) requestToUpdate.setTimeOut(requestData.getTimeOut());
-            if (requestData.getTimeIn() != null) requestToUpdate.setTimeIn(requestData.getTimeIn());
+        if (count == null || count == 0) {
+            return false;
+        }
+        StringBuilder sql = new StringBuilder("UPDATE request SET ");
+        List<Object> params = new ArrayList<>();
 
-            requestRepository.save(requestToUpdate);
+        // Only update fields that are not null
+        if (requestData.getAssetId() != null) {
+            sql.append("asset_id = ?, ");
+            params.add(requestData.getAssetId());
+        }
+        if (requestData.getUserId() != null) {
+            sql.append("user_id = ?, ");
+            params.add(requestData.getUserId());
+        }
+        if (requestData.getStatusId() != null) {
+            sql.append("status_id = ?, ");
+            params.add(requestData.getStatusId());
+        }
+        if (requestData.getConditionId() != null) {
+            sql.append("condition_id = ?, ");
+            params.add(requestData.getConditionId());
+        }
+        if (requestData.getDateOut() != null) {
+            sql.append("date_out = ?, ");
+            params.add(requestData.getDateOut());
+        }
+        if (requestData.getDateIn() != null) {
+            sql.append("date_in = ?, ");
+            params.add(requestData.getDateIn());
+        }
+        if (requestData.getTimeOut() != null) {
+            sql.append("time_out = ?, ");
+            params.add(requestData.getTimeOut());
+        }
+        if (requestData.getTimeIn() != null) {
+            sql.append("time_in = ?, ");
+            params.add(requestData.getTimeIn());
+        }
+
+        if (params.isEmpty()) {
+            return false;
+        }
+        sql.setLength(sql.length() - 2);
+        sql.append(" WHERE request_id = ?");
+        params.add(id);
+        int result = jdbcTemplate.update(sql.toString(), params.toArray());
+        if(result > 0){
             return true;
         }
 

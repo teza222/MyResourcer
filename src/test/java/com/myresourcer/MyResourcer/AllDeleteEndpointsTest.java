@@ -8,13 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -38,12 +39,15 @@ public class AllDeleteEndpointsTest {
     @MockitoBean private Status_Repository statusRepository;
     @MockitoBean private User_Repository userRepository;
     @MockitoBean private Request_Repository requestRepository;
+    @MockitoBean private JdbcTemplate jdbcTemplate;
 
     @Test
     public void testDeleteRequest() throws Exception {
-       //checking if the request exists
-        when(requestRepository.existsById(1)).thenReturn(true);
-        // performing the delete request mock test
+        when(jdbcTemplate.queryForObject(anyString(), any(Object[].class), eq(Integer.class)))
+                .thenReturn(1);
+        when(jdbcTemplate.update(anyString(), any(Object.class)))
+                .thenReturn(1);
+
         mockMvc.perform(delete("/requests/1")
                 .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
     }

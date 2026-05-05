@@ -10,21 +10,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
-public class AllPostEndpointsTest {
+public class AllCreateEndpointsTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -40,16 +43,19 @@ public class AllPostEndpointsTest {
     @MockitoBean private Status_Repository statusRepository;
     @MockitoBean private User_Repository userRepository;
     @MockitoBean private Request_Repository requestRepository;
+    @MockitoBean private JdbcTemplate jdbcTemplate;
 
     @Test
     public void testAddRequest() throws Exception {
+        when(jdbcTemplate.update(any(), any(Object[].class)))
+                .thenReturn(1);
         Roles role = new Roles(1, "Test Role");
         Departments dept = new Departments(1, "Test Dept");
         Categories cat = new Categories(1, "Test Category");
         Status status = new Status(1, "Test Status");
         Condition condition = new Condition(1, "Test Condition");
 
-        Users userEntity = new Users(1, "testuser_req", "password", "Test", "User", role, dept, 1);
+        Users userEntity = new Users(1, "testuser_req", "password", "Test", "User","test@gmail.com", role, dept, 1);
         DTO_Assets asset = new DTO_Assets(1, "Test Asset", true, "SN_REQ", "Specs", 2, false);
 
         DTO_Request request = new DTO_Request();
@@ -165,5 +171,16 @@ public class AllPostEndpointsTest {
                         .content(objectMapper.writeValueAsString(status)))
                 .andExpect(status().isCreated())
                 .andExpect(content().string("Status Successfully Added"));
+    }
+
+    @Test
+    public void testGetAllRequests() throws Exception {
+        // Mock the JdbcTemplate call for JDBC
+        when(jdbcTemplate.query(anyString(), any(RowMapper.class)))
+                .thenReturn(java.util.Arrays.asList()); // Return empty list for simplicity
+
+        mockMvc.perform(get("/requests")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
     }
 }

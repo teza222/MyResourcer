@@ -3,7 +3,7 @@ package com.myresourcer.MyResourcer.Controllers;
 import com.myresourcer.MyResourcer.DTOs.DTO_Assets;
 import com.myresourcer.MyResourcer.DTOs.DTO_Request;
 import com.myresourcer.MyResourcer.Models.*;
-import com.myresourcer.MyResourcer.Services.PUT_ServiceManager;
+import com.myresourcer.MyResourcer.Services.UPDATE_ServiceManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,15 +12,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-public class PUT_API_Controller {
+public class UPDATE_API_Controller {
 
     @Autowired
-    private PUT_ServiceManager serviceManager;
+    private UPDATE_ServiceManager serviceManager;
 
-    public PUT_API_Controller() {
+    public UPDATE_API_Controller() {
     }
 
-    private static final Logger logger = LogManager.getLogger(PUT_API_Controller.class);
+    private static final Logger logger = LogManager.getLogger(UPDATE_API_Controller.class);
 
     /// PUT REQUEST -------------------------------------->
     @PutMapping("/requests/{id}")

@@ -3,6 +3,7 @@ package com.myresourcer.MyResourcer.Services;
 import com.myresourcer.MyResourcer.Models.Assets;
 import com.myresourcer.MyResourcer.Repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -25,14 +26,25 @@ public class DELETE_ServiceManager {
     private Role_Repository roleRepository;
     @Autowired
     private Status_Repository statusRepository;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     public DELETE_ServiceManager() {
     }
 
     public boolean deleteRequest(Integer id) {
-        if (requestRepository.existsById(id)) {
-            requestRepository.deleteById(id);
-            return true;
+        if (id == null) {
+            return false;
+        }
+
+        String checkSql = "SELECT COUNT(*) FROM request WHERE request_id = ?";
+        Integer count = jdbcTemplate.queryForObject(checkSql, new Object[]{id}, Integer.class);
+
+        if (count != null && count > 0) {
+            // Delete the request
+            String deleteSql = "DELETE FROM request WHERE request_id = ?";
+            int result = jdbcTemplate.update(deleteSql, id);
+            return result > 0;
         }
         return false;
     }

@@ -9,13 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -23,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
-public class AllPutEndpointTest {
+public class AllUpdateEndpointTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -38,12 +39,14 @@ public class AllPutEndpointTest {
     @MockitoBean private Status_Repository statusRepository;
     @MockitoBean private User_Repository userRepository;
     @MockitoBean private Request_Repository requestRepository;
+    @MockitoBean private JdbcTemplate jdbcTemplate;
 
     @Test
     public void testUpdateRequest() throws Exception {
-        Request existingRequest = new Request();
-        existingRequest.setRequestId(1);
-        when(requestRepository.findById(1)).thenReturn(Optional.of(existingRequest));
+        when(jdbcTemplate.queryForObject(anyString(), any(Object[].class), eq(Integer.class)))
+                .thenReturn(1);
+        when(jdbcTemplate.update(anyString(), any(Object[].class)))
+                .thenReturn(1);
 
         DTO_Request updateData = new DTO_Request();
         updateData.setDateOut("2026-12-12");

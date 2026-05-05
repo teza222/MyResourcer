@@ -5,27 +5,26 @@ import com.myresourcer.MyResourcer.DTOs.DTO_Comments;
 import com.myresourcer.MyResourcer.DTOs.DTO_Request;
 import com.myresourcer.MyResourcer.DTOs.DTO_Users;
 import com.myresourcer.MyResourcer.Models.*;
-import com.myresourcer.MyResourcer.Services.POST_ServiceManager;
+import com.myresourcer.MyResourcer.Services.CREATE_ServiceManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @RestController
-public class POST_API_Controller {
+public class CREATE_API_Controller {
 
     @Autowired
-    private POST_ServiceManager serviceManager;
+    private CREATE_ServiceManager serviceManager;
 
 
-    public POST_API_Controller(){}
+    public CREATE_API_Controller(){}
 
-    private static final Logger logger = LogManager.getLogger(POST_API_Controller.class);
+    private static final Logger logger = LogManager.getLogger(CREATE_API_Controller.class);
 
 
 
